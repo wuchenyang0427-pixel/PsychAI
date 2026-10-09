@@ -245,7 +245,7 @@ cp .env.example .env
 docker compose up -d
 ```
 
-启动后访问 **http://localhost:5173**（后端接口在 http://localhost:8080）。
+启动后访问 <http://localhost:5173>（后端接口在 <http://localhost:8080>）。
 
 #### 编排了哪些服务
 
