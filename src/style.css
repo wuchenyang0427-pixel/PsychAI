@@ -1,0 +1,113 @@
+/* ============================================================
+   全局设计令牌：鼠尾草绿 + 米白暖灰的「疗愈系」配色
+   只在这里调变量，全站颜色自动联动
+   ============================================================ */
+:root {
+  /* 品牌绿：主色 / 深色（强调、悬停）/ 浅底（标签、底色块） */
+  --brand: #51926e;
+  --brand-deep: #39684d;
+  --brand-soft: #ecf3ee;
+  --brand-gradient: linear-gradient(135deg, #63a47f, #39684d);
+
+  /* 中性文字色：不用纯黑，用带绿意的深灰更柔和 */
+  --ink-1: #2e3b33;
+  --ink-2: #5d6f64;
+  --ink-3: #9aa9a0;
+
+  /* 描边与背景 */
+  --line: #e2eae3;
+  --bg-page: #f3f6f1;
+  --bg-card: #ffffff;
+
+  /* 圆角与阴影：大圆角 + 带绿意的弥散阴影 = 柔和高级感 */
+  --radius-lg: 18px;
+  --radius-md: 14px;
+  --shadow-soft: 0 8px 28px rgba(57, 104, 77, 0.08);
+  --shadow-hover: 0 14px 40px rgba(57, 104, 77, 0.14);
+}
+
+/* Element Plus 主题变量覆盖
+   注意：必须写 :root:root（叠两次提高优先级）——按需注入的组件样式
+   在 style.css 之后加载，同优先级会把这里的变量盖回去 */
+:root:root {
+  --el-color-primary: #51926e;
+  --el-color-primary-light-3: #85b39a;
+  --el-color-primary-light-5: #a8c9b7;
+  --el-color-primary-light-7: #cbded3;
+  --el-color-primary-light-8: #dce9e2;
+  --el-color-primary-light-9: #eef4f0;
+  --el-color-primary-dark-2: #417558;
+
+  /* success 也换成同族绿色，避免默认黄绿色与主色打架 */
+  --el-color-success: #67a878;
+  --el-color-success-light-3: #95c2a1;
+  --el-color-success-light-5: #b3d3bc;
+  --el-color-success-light-7: #d1e5d7;
+  --el-color-success-light-8: #e1ede4;
+  --el-color-success-light-9: #f0f6f1;
+  --el-color-success-dark-2: #528660;
+
+  /* 文字 / 描边 */
+  --el-text-color-primary: #2e3b33;
+  --el-text-color-regular: #4c5f54;
+  --el-border-color: #dfe8e1;
+  --el-border-color-light: #e3ebe5;
+  --el-border-color-lighter: #e9f0ea;
+
+  /* 圆角：整体比默认更圆更软 */
+  --el-border-radius-base: 8px;
+  --el-border-radius-small: 6px;
+  --el-border-radius-round: 22px;
+  --el-card-border-radius: 14px;
+  --el-dialog-border-radius: 16px;
+  --el-messagebox-border-radius: 14px;
+}
+
+/* 全局基础重置：后台页面需要撑满整个视口 */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', system-ui,
+    'Segoe UI', Roboto, sans-serif;
+  color: var(--ink-1);
+  background: var(--bg-page);
+}
+
+/* 选中文字的颜色：淡淡的绿 */
+::selection {
+  background: #cfe2d6;
+}
+
+/* 细滚动条：不抢戏 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: #c6d4ca;
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #a9bcae;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* 实心主按钮加一点带绿意的投影，更有质感（禁用/朴素态不要投影） */
+.el-button--primary:not(.is-disabled):not(.is-plain):not(.is-link):not(.is-text) {
+  box-shadow: 0 4px 12px rgba(81, 146, 110, 0.22);
+}
+.el-button--primary:not(.is-disabled):not(.is-plain):not(.is-link):not(.is-text):hover {
+  box-shadow: 0 6px 16px rgba(81, 146, 110, 0.3);
+}

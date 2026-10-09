@@ -1,0 +1,20 @@
+# 前端镜像构建上下文在仓库根目录，只保留前端需要的文件
+node_modules
+dist
+dist-ssr
+
+# 后端与文档不需要进前端镜像
+backend
+docs
+
+.git
+.gitignore
+.vscode
+.idea
+.trae
+
+docker-compose.yml
+.env
+.env.*
+*.log
+*.md

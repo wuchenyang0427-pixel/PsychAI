@@ -1,0 +1,37 @@
+server:
+  port: 8080
+
+spring:
+  servlet:
+    multipart:
+      # 论文 PDF 体积较大，单文件放宽到 30MB
+      max-file-size: 30MB
+      max-request-size: 32MB
+  data:
+    redis:
+      # 本地免安装版 Redis / Memurai 默认都是 6379 端口，无密码
+      # Docker Compose 里通过 REDIS_HOST / REDIS_PORT 覆盖，指向 redis 容器
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      timeout: 3000ms
+
+# 登录会话在 Redis 中的存活时间（小时）
+app:
+  session:
+    ttl-hours: 2
+  deepseek:
+    # DeepSeek 官方 API（OpenAI 兼容格式）
+    base-url: ${DEEPSEEK_BASE_URL:https://api.deepseek.com}
+    # 密钥从环境变量 DEEPSEEK_API_KEY 读取，绝不写进代码/仓库
+    api-key: ${DEEPSEEK_API_KEY}
+    model: ${DEEPSEEK_MODEL:deepseek-flash}
+  # RAG 知识库：本地 Ollama 跑 bge-m3 做嵌入，向量库自建（内存 + Redis 持久化）
+  ollama:
+    base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+    embedding-model: bge-m3
+  rag:
+    top-k: 8               # 每次问答注入几条 E 层论文片段（实测 @8 片段召回 81.5%，@3 只有 77.8%）
+    min-score: 0.30        # 余弦相似度及格线，bge-m3 相似度普遍低于 bge-large，0.30 较合适
+    chunk-size: 700        # 切块目标长度（按句子边界打包，不再从单词中间硬切）
+    overlap-max-sentence: 160   # 跨块重叠用的"上一块末句"最大长度，超过就不重叠
+    max-per-article: 3     # 同一篇文章最多贡献几条片段，避免一篇的近似重复片段占满 top-k

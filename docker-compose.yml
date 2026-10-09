@@ -1,0 +1,88 @@
+# ============================================================
+# 一键启动全部依赖与服务：docker compose up -d
+#   首次启动会自动下载 bge-m3 嵌入模型（约 1.2GB），需要几分钟
+#   启动前请在仓库根目录创建 .env 并填入 DEEPSEEK_API_KEY（参考 .env.example）
+# ============================================================
+
+services:
+
+  # ---------- 基础设施 ----------
+  redis:
+    image: redis:7-alpine
+    container_name: psych-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # ---------- 本地嵌入模型服务 ----------
+  ollama:
+    image: ollama/ollama:latest
+    container_name: psych-ollama
+    restart: unless-stopped
+    volumes:
+      - ollama-data:/root/.ollama
+    ports:
+      - "11434:11434"
+
+  # 一次性任务：等 Ollama 就绪后拉取 bge-m3，拉完即退出
+  # 后端会等它成功结束再启动，保证知识库首次入库不会因缺模型而跳过
+  ollama-init:
+    image: ollama/ollama:latest
+    container_name: psych-ollama-init
+    depends_on:
+      - ollama
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+    entrypoint: ["/bin/sh", "-c", "until ollama pull bge-m3; do echo '[等待] Ollama 尚未就绪，5 秒后重试...'; sleep 5; done"]
+    restart: "no"
+
+  # ---------- 应用 ----------
+  backend:
+    build:
+      context: ./backend
+    container_name: psych-backend
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+      ollama-init:
+        condition: service_completed_successfully
+    environment:
+      # 密钥必填：未配置时 compose 会直接报错退出，避免起来后聊天功能静默失败
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:?请先在仓库根目录的 .env 中配置 DEEPSEEK_API_KEY}
+      DEEPSEEK_BASE_URL: ${DEEPSEEK_BASE_URL:-https://api.deepseek.com}
+      DEEPSEEK_MODEL: ${DEEPSEEK_MODEL:-deepseek-flash}
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      OLLAMA_BASE_URL: http://ollama:11434
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/127.0.0.1/8080'"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 40s
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: psych-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      # 浏览器访问 http://localhost:5173
+      - "5173:80"
+
+volumes:
+  redis-data:
+  ollama-data:
